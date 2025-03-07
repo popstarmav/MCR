@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,12 +20,62 @@
     </section>
     <section class="about">
         <h3>About $MCR</h3>
-        <p>Welcome to Memecoin Reserve ($MCR). We’re here giving back to the memecoin world. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls head-on by sharing 25% of profits as Meme Dividends—split between holders and scam victims every quarter (April, July, October, January) if we meet our target. Why 25%? It’s fair: 12.5% supports scam victims, helping those hurt by rug pulls, and 12.5% rewards holders, encouraging community participation. The remaining 75% of profits is retained to fuel $MCR’s growth, ensuring sustainability by covering development, marketing, and operations, allowing the project to thrive long-term.
+        <p>Welcome to Memecoin Reserve ($MCR). We’re here giving back to the memecoin world. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls head-on by sharing 25% of profits as Meme Dividends—split between holders and scam victims every quarter (April, July, October, January) if we meet our target. Why only 25%? It’s fair: 12.5% supports scam victims, helping those hurt by rug pulls, and 12.5% rewards holders, encouraging community participation. The remaining 75% of profits is retained to fuel $MCR’s growth, ensuring sustainability by covering development, marketing, and operations, allowing the project to thrive long-term.
 
-            This quarterly payout rule also applies to any other memecoins we launch in the future. Whether ist’s a new coin inspired by $MCR’s vision or a different memecoin project, the same principle of quarterly distributions—contingent on meeting a target—will guide our approach, creating a consistent and transparent reward system across our ecosystem. This commitment reflects our dedication to building a supportive memecoin community</p>
+            This quarterly payout rule also applies to any other memecoins we launch in the future. Whether it’s a new coin inspired by $MCR’s vision or a different memecoin project, the same principle of quarterly distributions—contingent on meeting a target—will guide our approach, creating a consistent and transparent reward system across our ecosystem. This commitment reflects our dedication to building a supportive memecoin community.</p>
+    </section>
+    <!-- Progress Bar Section -->
+    <section class="progress-section">
+        <div class="bar-container">
+            <div class="bar-fill" id="progressBar">0%</div>
+        </div>
+        <div id="statusMessage"></div>
     </section>
     <footer>
         <p>Stay connected with our community: <a href="https://discord.gg/KVJxgjF2mR">AILYF3</a></p>
     </footer>
+    <!-- Embedded JavaScript -->
+    <script>
+        // Initial values
+        let currentValue = 0; // Replace with real data (e.g., current market cap)
+        let targetValue = 100; // Replace with real target (e.g., $500K market cap)
+        let isEligible = true; // Set to false if user shouldn't see progress
+        let progressInterval;
+
+        function updateProgress() {
+            if (!isEligible) {
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('statusMessage').textContent = 'You are not eligible for dividends.';
+                return;
+            }
+
+            const percentage = Math.min((currentValue / targetValue) * 100, 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${Math.round(percentage)}%`;
+
+            if (percentage >= 100) {
+                clearInterval(progressInterval);
+                document.getElementById('statusMessage').textContent = 'Goal reached! Dividend payout in progress...';
+            } else {
+                document.getElementById('statusMessage').textContent = `Progress: ${Math.round(percentage)}% toward dividend payout.`;
+            }
+        }
+
+        // Simulate progress (replace with real data update in production)
+        function startSimulation() {
+            progressInterval = setInterval(() => {
+                currentValue += 1; // Simulate increase (e.g., 1 unit per second)
+                if (currentValue > targetValue) currentValue = targetValue;
+                updateProgress();
+            }, 100); // Update every 100ms
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProgress();
+            if (isEligible) startSimulation();
+        });
+    </script>
 </body>
 </html>

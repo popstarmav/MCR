@@ -43,6 +43,37 @@ section {
     border: 0.2vw solid #fff;
 }
 
+.progress-section {
+    margin: 2vh auto;
+    padding: 1vh 2vw;
+}
+
+.bar-container {
+    width: 90%;
+    max-width: 500px;
+    background-color: #444;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.bar-fill {
+    width: 0%;
+    height: 20px;
+    background-color: #00ff00;
+    text-align: center;
+    line-height: 20px;
+    color: #000;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    transition: width 0.5s ease-in-out;
+}
+
+#statusMessage {
+    margin-top: 1vh;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    color: #ffff00;
+}
+
 .hero {
     text-align: center;
 }
@@ -100,6 +131,13 @@ footer a {
         margin: 1.5vh auto;
         padding: 1.5vh 1.5vw;
     }
+    .progress-section {
+        padding: 1vh 1.5vw;
+    }
+    .bar-container {
+        width: 95%;
+        max-width: 400px;
+    }
     .hero .pixel-art {
         width: clamp(120px, 35vw, 150px);
     }
@@ -119,6 +157,17 @@ footer a {
         margin: 1vh auto;
         padding: 1vh 1vw;
     }
+    .progress-section {
+        padding: 0.8vh 1vw;
+    }
+    .bar-container {
+        width: 95%;
+        max-width: 350px;
+    }
+    .bar-fill {
+        height: 15px;
+        line-height: 15px;
+    }
     .hero .pixel-art {
         width: clamp(100px, 30vw, 120px);
     }
@@ -126,7 +175,7 @@ footer a {
         padding: clamp(0.3rem, 1vw, 0.6rem) clamp(0.6rem, 2vw, 1rem);
     }
     footer {
-        padding: 0.3vh 0; /* Reduced from 0.5vh to 0.3vh for smaller height */
-        border-top: 0.1vw solid #fff; /* Reduced from 0.2vw to 0.1vw for thinner border */
+        padding: 0.2vh 0;
+        border-top: 0.05vw solid #fff;
     }
 }
