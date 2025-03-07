@@ -9,9 +9,9 @@ body {
 }
 
 header {
-    background-color: #ff0000;
+    background-color: #ff0000; /* Red background */
     padding: 20px;
-    border-bottom: 4px solid #fff;
+    border-bottom: 2px solid #fff; /* Reduced from 4px to 2px */
 }
 
 h1 {
@@ -38,19 +38,28 @@ section {
     margin: 20px;
     padding: 20px;
     background-color: #333;
-    border: 4px solid #fff;
+    border: 4px solid #fff; /* White border, unchanged unless you meant this */
+}
+
+.hero {
+    text-align: center;
 }
 
 .hero .pixel-art {
+    display: block;
+    margin: 0 auto;
     width: 200px;
     height: auto;
     image-rendering: pixelated;
+}
+
+.hero h3 {
     margin: 10px 0;
 }
 
 .btn {
     display: inline-block;
-    padding: 5px 20px;
+    padding: 10px 20px;
     background-color: #00ffff;
     color: #000;
     text-decoration: none;
@@ -65,9 +74,9 @@ section {
 }
 
 footer {
-    background-color: #0000ff;
+    background-color: #0000ff; /* Blue background */
     padding: 10px;
-    border-top: 4px solid #fff;
+    border-top: 2px solid #fff; /* Reduced from 4px to 2px */
     position: fixed;
     bottom: 0;
     width: 100%;
