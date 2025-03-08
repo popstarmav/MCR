@@ -20,13 +20,19 @@
     </section>
     <section class="about">
         <h3>About $MCR</h3>
-        <p>The Memecoin Reserve ($MCR), is here to give back to the people. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $70,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $70,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
+        <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $70,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $70,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
     </section>
     <!-- DOGE Efficiency Clock Section -->
-    <section class="AILYF3-efficiency-clock">
-        <h3>AILYF3 Efficiency Clock</h3>
+    <section class="doge-efficiency-clock">
+        <h3>DOGE Efficiency Clock</h3>
         <div id="efficiencyTimer">Next Efficiency Payout: Calculating...</div>
         <p>Counting down to the next $MCR dividend—cutting waste, meme-style!</p>
+    </section>
+    <!-- 2-Hour Event Timer Section -->
+    <section class="event-timer-section">
+        <h3>2-Hour Event Timer</h3>
+        <div id="eventTimer">Event Ends In: Calculating...</div>
+        <p>Reset to original state after 2 hours!</p>
     </section>
     <!-- Progress Bar Section -->
     <section class="progress-section">
@@ -158,10 +164,52 @@
             setInterval(updateCountdown, 1000);
         }
 
+        // 2-Hour Event Timer and Reset
+        function startEventTimer() {
+            let timeLeft = 7200; // 2 hours in seconds
+            const endTime = Date.now() + timeLeft * 1000;
+
+            function updateEventCountdown() {
+                const now = Date.now();
+                timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+
+                if (timeLeft <= 0) {
+                    document.getElementById('eventTimer').textContent = "Event Over! Resetting...";
+                    resetToOriginalState();
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (3600 * 24));
+                const hours = Math.floor((timeLeft % (3600 * 24)) / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+
+                document.getElementById('eventTimer').textContent = `Event Ends In: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            // Update every second
+            updateEventCountdown();
+            const intervalId = setInterval(updateEventCountdown, 1000);
+
+            // Clear interval when time runs out (handled by reset)
+            return intervalId;
+        }
+
+        function resetToOriginalState() {
+            // Reset totalSavings for all memecoins to 0
+            memecoins.forEach(coin => {
+                coin.totalSavings = 0;
+            });
+            // Reset progress bar and status
+            updateProgress();
+            document.getElementById('statusMessage').textContent = `Reset to original state. Total Savings: $0 for ${approvedCount} approved across ${memecoins.length} memecoins.`;
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             fetchMyMemecoins();
             startEfficiencyClock();
+            startEventTimer(); // Start the 2-hour timer
         });
     </script>
 </body>

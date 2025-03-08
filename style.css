@@ -58,6 +58,21 @@ section {
     margin-bottom: 0.5vh;
 }
 
+.event-timer-section {
+    margin: 1.5vh auto;
+    padding: 0.8vh 1.5vw;
+    background-color: #222;
+    border: 0.15vw solid #ffcc00; /* Slightly different yellow for event timer */
+    box-shadow: 0 0 10px #ffcc00; /* Glowing effect */
+}
+
+#eventTimer {
+    font-size: clamp(0.6rem, 1.5vw, 1rem);
+    color: #ffcc00; /* Event timer yellow text */
+    text-shadow: 0.05rem 0.05rem #000;
+    margin-bottom: 0.5vh;
+}
+
 .progress-section {
     margin: 1.5vh auto;
     padding: 0.8vh 1.5vw;
@@ -150,6 +165,9 @@ footer a {
     .doge-efficiency-clock {
         padding: 0.6vh 1.2vw;
     }
+    .event-timer-section {
+        padding: 0.6vh 1.2vw;
+    }
     .progress-section {
         padding: 0.6vh 1.2vw;
     }
@@ -177,6 +195,9 @@ footer a {
         padding: 0.8vh 1vw;
     }
     .doge-efficiency-clock {
+        padding: 0.5vh 1vw;
+    }
+    .event-timer-section {
         padding: 0.5vh 1vw;
     }
     .progress-section {
