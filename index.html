@@ -17,22 +17,17 @@
         <h3>MEMECOINS RESERVE CURRENCY</h3>
         <p>The Memecoin Reserve ($MCR) is a revolutionary meme token that combines the power of memes with the stability of a reserve currency.</p>
         <a href="https://pump.fun/YOUR_TOKEN_ADDRESS" target="_blank" class="btn">BUY $MCR</a>
+        <button class="btn" onclick="speakMCRPromo()">Hear $MCR Promo</button>
     </section>
     <section class="about">
         <h3>About $MCR</h3>
         <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $70,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $70,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
     </section>
     <!-- DOGE Efficiency Clock Section -->
-    <section class="AILYF3-efficiency-clock">
-        <h3>AILYF3 Efficiency Clock</h3>
+    <section class="doge-efficiency-clock">
+        <h3>DOGE Efficiency Clock</h3>
         <div id="efficiencyTimer">Next Efficiency Payout: Calculating...</div>
         <p>Counting down to the next $MCR dividend—cutting waste, meme-style!</p>
-    </section>
-    <!-- 2-Hour Event Timer Section -->
-    <section class="LAUNCH-timer-section">
-        <h3>MEMECOIN LAUNCH Event Timer</h3>
-        <div id="eventTimer">Event Ends In: Calculating...</div>
-        <p>GET READY DONT MISS OUT ON THE LAUNCH</p>
     </section>
     <!-- Progress Bar Section -->
     <section class="progress-section">
@@ -84,7 +79,6 @@
 
             const totalSavings = memecoins.reduce((total, coin) => total + coin.totalSavings, 0);
             const totalTargetDividend = getTotalTargetDividend();
-            // Check if dividend pool can support the $70,000 cut
             if (totalTargetDividend < 70000) {
                 document.getElementById('progressBar').style.width = '0%';
                 document.getElementById('statusMessage').textContent = `Insufficient profits for dividends (needs $${(70000 / 0.25).toLocaleString()} total profits). Total Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved across ${memecoins.length} memecoins.`;
@@ -107,7 +101,7 @@
 
         // Function for you to manually update approvedCount (call this when needed)
         function setApprovedCount(newCount) {
-            approvedCount = Math.max(0, newCount); // Ensure non-negative
+            approvedCount = Math.max(0, newCount);
             updateProgress();
         }
 
@@ -115,9 +109,9 @@
         function updateMemecoin(name, newMarketCap, newSavings) {
             const coin = memecoins.find(c => c.name === name);
             if (coin) {
-                coin.marketCap = Math.max(0, newMarketCap); // Ensure non-negative market cap
-                coin.totalSavings = Math.max(0, newSavings); // Ensure non-negative savings
-                updateProgress(); // Recalculate progress with new market cap
+                coin.marketCap = Math.max(0, newMarketCap);
+                coin.totalSavings = Math.max(0, newSavings);
+                updateProgress();
             }
         }
 
@@ -134,7 +128,6 @@
                 const now = new Date();
                 let nextPayout = payoutDates.find(date => date > now);
                 if (!nextPayout) {
-                    // If past the last date, set to next year's first payout (January 1)
                     nextPayout = new Date(now.getFullYear() + 1, 0, 1);
                 }
                 return nextPayout;
@@ -147,7 +140,7 @@
 
                 if (timeDiff <= 0) {
                     document.getElementById('efficiencyTimer').textContent = "Efficiency Payout Time! Processing...";
-                    setTimeout(updateCountdown, 1000); // Check again after 1 second
+                    setTimeout(updateCountdown, 1000);
                     return;
                 }
 
@@ -159,57 +152,30 @@
                 document.getElementById('efficiencyTimer').textContent = `Next Efficiency Payout: ${days}d ${hours}h ${minutes}m ${seconds}s`;
             }
 
-            // Update every second
             updateCountdown();
             setInterval(updateCountdown, 1000);
         }
 
-        // 2-Hour Event Timer and Reset
-        function startEventTimer() {
-            let timeLeft = 7200; // 2 hours in seconds
-            const endTime = Date.now() + timeLeft * 1000;
+        // Text-to-Speech Promo Function
+        function speakMCRPromo() {
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = "Breaking news, Bikini Bottom! The Memecoin Reserve, $MCR, pays 25 percent dividends! Creator grabs 70,000 dollars, split with holders and victims. Market caps shift live—profits dip, dividends stop! Watch the 2-hour event timer! Buy $MCR now on Pump.fun—leeeedle leeedle lee!";
+            speech.volume = 1;
+            speech.rate = 1.2;
+            speech.pitch = 1.2;
+            speech.lang = 'en-US';
 
-            function updateEventCountdown() {
-                const now = Date.now();
-                timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+            setTimeout(() => {
+                window.speechSynthesis.cancel();
+            }, 15000);
 
-                if (timeLeft <= 0) {
-                    document.getElementById('eventTimer').textContent = "Event Over! Resetting...";
-                    resetToOriginalState();
-                    return;
-                }
-
-                const days = Math.floor(timeLeft / (3600 * 24));
-                const hours = Math.floor((timeLeft % (3600 * 24)) / 3600);
-                const minutes = Math.floor((timeLeft % 3600) / 60);
-                const seconds = timeLeft % 60;
-
-                document.getElementById('eventTimer').textContent = `Event Ends In: ${days}d ${hours}h ${minutes}m ${seconds}s`;
-            }
-
-            // Update every second
-            updateEventCountdown();
-            const intervalId = setInterval(updateEventCountdown, 1000);
-
-            // Clear interval when time runs out (handled by reset)
-            return intervalId;
-        }
-
-        function resetToOriginalState() {
-            // Reset totalSavings for all memecoins to 0
-            memecoins.forEach(coin => {
-                coin.totalSavings = 0;
-            });
-            // Reset progress bar and status
-            updateProgress();
-            document.getElementById('statusMessage').textContent = `Reset to original state. Total Savings: $0 for ${approvedCount} approved across ${memecoins.length} memecoins.`;
+            window.speechSynthesis.speak(speech);
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             fetchMyMemecoins();
             startEfficiencyClock();
-            startEventTimer(); // Start the 2-hour timer
         });
     </script>
 </body>
