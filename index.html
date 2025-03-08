@@ -20,9 +20,13 @@
     </section>
     <section class="about">
         <h3>About $MCR</h3>
-        <p>Welcome to Memecoin Reserve ($MCR). We’re here giving back to the memecoin world. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls head-on by sharing 25% of profits as Meme Dividends—split between holders and scam victims every quarter (April, July, October, January) if we meet our target. Why only 25%? It’s fair: 12.5% supports scam victims, helping those hurt by rug pulls, and 12.5% rewards holders, encouraging community participation. The remaining 75% of profits is retained to fuel $MCR’s growth, ensuring sustainability by covering development, marketing, and operations, allowing the project to thrive long-term.
-
-            This quarterly payout rule also applies to any other memecoins we launch in the future. Whether it’s a new coin inspired by $MCR’s vision or a different memecoin project, the same principle of quarterly distributions—contingent on meeting a target—will guide our approach, creating a consistent and transparent reward system across our ecosystem. This commitment reflects our dedication to building a supportive memecoin community.</p>
+        <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $70,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $70,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
+    </section>
+    <!-- DOGE Efficiency Clock Section -->
+    <section class="doge-efficiency-clock">
+        <h3>DOGE Efficiency Clock</h3>
+        <div id="efficiencyTimer">Next Efficiency Payout: Calculating...</div>
+        <p>Counting down to the next $MCR dividend—cutting waste, meme-style!</p>
     </section>
     <!-- Progress Bar Section -->
     <section class="progress-section">
@@ -36,8 +40,8 @@
     </footer>
     <!-- Embedded JavaScript -->
     <script>
-        // Your Solana wallet address (replace with your actual wallet address)
-        const creatorWallet = "YOUR_SOLANA_WALLET_ADDRESS_HERE"; // e.g., "5STkQy...95T7Cq"
+        // Your Solana wallet address
+        const creatorWallet = "5MmV7mbFfkFy9N5MC6wBgJP1nrf7A89Fr5H1hqqNT52q";
 
         // Array to track your launched memecoins (update marketCap and totalSavings manually)
         let memecoins = [
@@ -59,9 +63,10 @@
             }
         }
 
-        // Calculate total target dividend (25% of combined market cap)
+        // Calculate total target dividend (25% of combined market cap, adjusted for $70,000 cut)
         function getTotalTargetDividend() {
-            return memecoins.reduce((total, coin) => total + coin.marketCap, 0) * 0.25;
+            const totalMarketCap = memecoins.reduce((total, coin) => total + coin.marketCap, 0);
+            return totalMarketCap * 0.25; // 25% of total market cap
         }
 
         function updateProgress() {
@@ -73,6 +78,13 @@
 
             const totalSavings = memecoins.reduce((total, coin) => total + coin.totalSavings, 0);
             const totalTargetDividend = getTotalTargetDividend();
+            // Check if dividend pool can support the $70,000 cut
+            if (totalTargetDividend < 70000) {
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('statusMessage').textContent = `Insufficient profits for dividends (needs $${(70000 / 0.25).toLocaleString()} total profits). Total Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved across ${memecoins.length} memecoins.`;
+                return;
+            }
+
             const currentValue = approvedCount > 0 ? totalSavings / approvedCount : 0;
             const percentage = Math.min((currentValue / totalTargetDividend) * 100, 100);
             const progressBar = document.getElementById('progressBar');
@@ -82,14 +94,10 @@
             if (percentage >= 100) {
                 document.getElementById('statusMessage').textContent = 'Goal reached! Dividend payout in progress...';
             } else {
-                document.getElementById('statusMessage').textContent = `Progress: ${Math.round(percentage)}% toward $${totalTargetDividend.toLocaleString()} dividend payout. Total Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved across ${memecoins.length} memecoins.`;
+                const remainingPool = totalTargetDividend - 70000;
+                document.getElementById('statusMessage').textContent = `Progress: ${Math.round(percentage)}% toward $${totalTargetDividend.toLocaleString()} dividend payout. Total Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved across ${memecoins.length} memecoins. Creator's Cut: $70,000. Holders & Victims: $${remainingPool.toLocaleString()} (split equally).`;
             }
         }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchMyMemecoins();
-        });
 
         // Function for you to manually update approvedCount (call this when needed)
         function setApprovedCount(newCount) {
@@ -101,11 +109,60 @@
         function updateMemecoin(name, newMarketCap, newSavings) {
             const coin = memecoins.find(c => c.name === name);
             if (coin) {
-                coin.marketCap = Math.max(0, newMarketCap);
-                coin.totalSavings = Math.max(0, newSavings);
-                updateProgress();
+                coin.marketCap = Math.max(0, newMarketCap); // Ensure non-negative market cap
+                coin.totalSavings = Math.max(0, newSavings); // Ensure non-negative savings
+                updateProgress(); // Recalculate progress with new market cap
             }
         }
+
+        // DOGE Efficiency Clock Countdown Timer
+        function startEfficiencyClock() {
+            const payoutDates = [
+                new Date("2025-04-01T00:00:00Z"),
+                new Date("2025-07-01T00:00:00Z"),
+                new Date("2025-10-01T00:00:00Z"),
+                new Date("2026-01-01T00:00:00Z")
+            ];
+
+            function getNextPayoutDate() {
+                const now = new Date();
+                let nextPayout = payoutDates.find(date => date > now);
+                if (!nextPayout) {
+                    // If past the last date, set to next year's first payout (January 1)
+                    nextPayout = new Date(now.getFullYear() + 1, 0, 1);
+                }
+                return nextPayout;
+            }
+
+            function updateCountdown() {
+                const now = new Date();
+                const nextPayout = getNextPayoutDate();
+                const timeDiff = nextPayout - now;
+
+                if (timeDiff <= 0) {
+                    document.getElementById('efficiencyTimer').textContent = "Efficiency Payout Time! Processing...";
+                    setTimeout(updateCountdown, 1000); // Check again after 1 second
+                    return;
+                }
+
+                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+                document.getElementById('efficiencyTimer').textContent = `Next Efficiency Payout: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            // Update every second
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchMyMemecoins();
+            startEfficiencyClock();
+        });
     </script>
 </body>
 </html>
