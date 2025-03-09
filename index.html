@@ -65,7 +65,7 @@
 
             const totalSavings = memecoins.reduce((total, coin) => total + coin.totalSavings, 0);
             const totalTargetDividend = getTotalTargetDividend();
-            const creatorCut = 70000;
+            const creatorCut = 40000;
 
             if (totalTargetDividend < creatorCut) {
                 document.getElementById('progressBar').style.width = '0%';
