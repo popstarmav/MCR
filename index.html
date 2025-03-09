@@ -20,15 +20,13 @@
     </section>
     <section class="about">
         <h3>About $MCR</h3>
-        <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $40,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $40,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
+        <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $70,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $70,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
     </section>
-    <!-- DOGE Efficiency Clock Section -->
     <section class="AILYF3-efficiency-clock">
         <h3>AILYF3 Efficiency Clock</h3>
         <div id="efficiencyTimer">Next Efficiency Payout: Calculating...</div>
         <p>Counting down to the next $MCR dividend—cutting waste, meme-style!</p>
     </section>
-    <!-- Progress Bar Section -->
     <section class="progress-section">
         <div class="bar-container">
             <div class="bar-fill" id="progressBar">0%</div>
@@ -38,24 +36,14 @@
     <footer>
         <p>Stay connected with our community: <a href="https://discord.gg/KVJxgjF2mR">AILYF3</a></p>
     </footer>
-    <!-- Embedded JavaScript -->
     <script>
-        // Your Solana wallet address
         const creatorWallet = "5MmV7mbFfkFy9N5MC6wBgJP1nrf7A89Fr5H1hqqNT52q";
+        let memecoins = [{ name: "$MCR", marketCap: 1000000, totalSavings: 0 }];
+        let approvedCount = 0;
+        let isEligible = true;
 
-        // Array to track your launched memecoins (update marketCap and totalSavings manually)
-        let memecoins = [
-            { name: "$MCR", marketCap: 1000000, totalSavings: 0 } // Placeholder for $MCR
-        ];
-        // Manually set the number of approved people (update this value as needed)
-        let approvedCount = 0; // You will update this manually
-        let isEligible = true; // Set to false if user shouldn't see progress
-
-        // Simulate fetching memecoins launched by your wallet (replace with real API call)
         async function fetchMyMemecoins() {
             try {
-                // In production, query Solana blockchain or Pump.fun API for tokens created by creatorWallet
-                // For now, use the existing memecoins array (already initialized)
                 updateProgress();
             } catch (error) {
                 console.error("Error fetching memecoins:", error);
@@ -63,10 +51,9 @@
             }
         }
 
-        // Calculate total target dividend (25% of combined market cap, adjusted for $70,000 cut)
         function getTotalTargetDividend() {
             const totalMarketCap = memecoins.reduce((total, coin) => total + coin.marketCap, 0);
-            return totalMarketCap * 0.25; // 25% of total market cap
+            return totalMarketCap * 0.25;
         }
 
         function updateProgress() {
@@ -78,9 +65,11 @@
 
             const totalSavings = memecoins.reduce((total, coin) => total + coin.totalSavings, 0);
             const totalTargetDividend = getTotalTargetDividend();
-            if (totalTargetDividend < 70000) {
+            const creatorCut = 70000;
+
+            if (totalTargetDividend < creatorCut) {
                 document.getElementById('progressBar').style.width = '0%';
-                document.getElementById('statusMessage').textContent = `Insufficient profits for dividends (needs $${(70000 / 0.25).toLocaleString()} total profits). Total Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved across ${memecoins.length} memecoins.`;
+                document.getElementById('statusMessage').textContent = `Insufficient profits for dividends (needs $${(creatorCut / 0.25).toLocaleString()} total market cap). Current Savings: $${totalSavings.toLocaleString()} across ${memecoins.length} memecoin(s).`;
                 return;
             }
 
@@ -91,20 +80,25 @@
             progressBar.textContent = `${Math.round(percentage)}%`;
 
             if (percentage >= 100) {
-                document.getElementById('statusMessage').textContent = 'Goal reached! Dividend payout in progress...';
+                document.getElementById('statusMessage').textContent = 'Dividend goal reached! Payout processing...';
             } else {
-                const remainingPool = totalTargetDividend - 70000;
-                document.getElementById('statusMessage').textContent = `Progress: ${Math.round(percentage)}% toward $${totalTargetDividend.toLocaleString()} dividend payout. Total Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved across ${memecoins.length} memecoins. Creator's Cut: $70,000. Holders & Victims: $${remainingPool.toLocaleString()} (split equally).`;
+                const remainingPool = totalTargetDividend - creatorCut;
+                const holderShare = remainingPool * 0.5; // 12.5% of total profits
+                const victimShare = remainingPool * 0.5; // 12.5% of total profits
+                document.getElementById('statusMessage').textContent = 
+                    `Progress: ${Math.round(percentage)}% of $${totalTargetDividend.toLocaleString()} dividend goal. ` +
+                    `Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved claim(s) across ${memecoins.length} memecoin(s). ` +
+                    `Creator's Cut: $${creatorCut.toLocaleString()}. ` +
+                    `Holders: $${holderShare.toLocaleString()} (12.5%). ` +
+                    `Victims: $${victimShare.toLocaleString()} (12.5%).`;
             }
         }
 
-        // Function for you to manually update approvedCount (call this when needed)
         function setApprovedCount(newCount) {
             approvedCount = Math.max(0, newCount);
             updateProgress();
         }
 
-        // Function for you to manually update memecoin data (call this when needed)
         function updateMemecoin(name, newMarketCap, newSavings) {
             const coin = memecoins.find(c => c.name === name);
             if (coin) {
@@ -114,7 +108,6 @@
             }
         }
 
-        // DOGE Efficiency Clock Countdown Timer
         function startEfficiencyClock() {
             const payoutDates = [
                 new Date("2025-04-01T00:00:00Z"),
@@ -126,9 +119,7 @@
             function getNextPayoutDate() {
                 const now = new Date();
                 let nextPayout = payoutDates.find(date => date > now);
-                if (!nextPayout) {
-                    nextPayout = new Date(now.getFullYear() + 1, 0, 1);
-                }
+                if (!nextPayout) nextPayout = new Date(now.getFullYear() + 1, 0, 1);
                 return nextPayout;
             }
 
@@ -155,7 +146,6 @@
             setInterval(updateCountdown, 1000);
         }
 
-        // Text-to-Speech Promo Function
         function speakMCRPromo() {
             const speech = new SpeechSynthesisUtterance();
             speech.text = "Breaking news, Bikini Bottom! The Memecoin Reserve, $MCR, pays 25 percent dividends! Creator grabs 70,000 dollars, split with holders and victims. Market caps shift live—profits dip, dividends stop! Watch the 2-hour event timer! Buy $MCR now on Pump.fun—leeeedle leeedle lee!";
@@ -163,15 +153,10 @@
             speech.rate = 1.2;
             speech.pitch = 1.2;
             speech.lang = 'en-US';
-
-            setTimeout(() => {
-                window.speechSynthesis.cancel();
-            }, 15000);
-
+            setTimeout(() => window.speechSynthesis.cancel(), 15000);
             window.speechSynthesis.speak(speech);
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             fetchMyMemecoins();
             startEfficiencyClock();
