@@ -1,231 +1,873 @@
-                function initializeStockChart() {
-                    const chartContainer = document.getElementById('stock-chart');
-                    const chart = LightweightCharts.createChart(chartContainer, {
-                        width: chartContainer.clientWidth,
-                        height: 400,
-                        layout: { 
-                            background: { color: '#1a1a1a' }, 
-                            textColor: '#00ff00' 
-                        },
-                        grid: { 
-                            vertLines: { color: '#333333' }, 
-                            horzLines: { color: '#333333' } 
-                        },
-                        timeScale: { 
-                            timeVisible: true, 
-                            secondsVisible: false,
-                            borderColor: '#00ff00'
-                        },
-                        crosshair: {
-                            mode: LightweightCharts.CrosshairMode.Normal,
-                            vertLine: {
-                                color: '#00ff00',
-                                width: 1,
-                                style: LightweightCharts.LineStyle.Dashed,
-                            },
-                            horzLine: {
-                                color: '#00ff00',
-                                width: 1,
-                                style: LightweightCharts.LineStyle.Dashed,
-                            },
-                        },
-                    });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memecoin Reserve ($MCR) with Stock Market App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        /* Pokémon TradingView Section Styles */
+        .pokemon-tradingview-section {
+            padding: 20px;
+            background-color: #f0f0f0;
+            background-image: url('https://www.transparenttextures.com/patterns/pokeball.png');
+            background-repeat: repeat;
+            border: none;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            text-align: left;
+        }
 
-                    const candlestickSeries = chart.addCandlestickSeries({
-                        upColor: '#00ff00',
-                        downColor: '#ff0000',
-                        wickUpColor: '#00ff00',
-                        wickDownColor: '#ff0000',
-                        borderVisible: false,
-                    });
+        .pokemon-tradingview-section .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            border: 4px solid #e3350d;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
 
-                    let bidPrice = 100.00;
-                    let spread = 0.20;
-                    let marketData = [];
-                    let cash = 10000;
-                    let shares = 0;
-                    let time = Math.floor(Date.now() / 1000);
+        .pokemon-tradingview-section header {
+            background-color: #3c5aa6;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            border-bottom: none;
+        }
 
-                    // Market participants
-                    const marketParticipants = [
-                        { name: "Institutional Investor", cash: 500000, shares: 500, buyChance: 0.35, sellChance: 0.25, impact: 0.05 },
-                        { name: "Day Trader", cash: 25000, shares: 100, buyChance: 0.45, sellChance: 0.45, impact: 0.02 },
-                        { name: "Retail Investor", cash: 10000, shares: 20, buyChance: 0.3, sellChance: 0.2, impact: 0.01 },
-                        { name: "Hedge Fund", cash: 1000000, shares: 1000, buyChance: 0.2, sellChance: 0.3, impact: 0.1 }
-                    ];
+        .pokemon-tradingview-section h1 {
+            font-size: 20px;
+            text-transform: uppercase;
+            color: #e3350d;
+            text-shadow: 1px 1px #ffcb05;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
 
-                    const bidPriceDisplay = document.getElementById('stock-bid-price');
-                    const askPriceDisplay = document.getElementById('stock-ask-price');
-                    const cashDisplay = document.getElementById('stock-cash');
-                    const sharesDisplay = document.getElementById('stock-shares');
-                    const portfolioDisplay = document.getElementById('stock-portfolio');
+        .pokemon-tradingview-section p {
+            font-size: 14px;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            max-width: 100%;
+        }
 
-                    function generateInitialMarketData() {
-                        const basePrice = 100.00;
-                        const volatility = 2.0;
-                        
-                        // Generate data for the past 30 periods
-                        for (let i = 0; i < 30; i++) {
-                            // Simulate some market movement
-                            if (i > 0) {
-                                const prevClose = marketData[i-1].close;
-                                const change = (Math.random() - 0.5) * volatility;
-                                bidPrice = Math.max(50, Math.min(150, prevClose + change));
-                            } else {
-                                bidPrice = basePrice;
-                            }
-                            
-                            const high = bidPrice + Math.random() * volatility;
-                            const low = bidPrice - Math.random() * volatility;
-                            
-                            marketData.push({
-                                time: time - (30 - i) * 3600, // Hourly candles
-                                open: i === 0 ? basePrice : marketData[i-1].close,
-                                high: Math.max(high, bidPrice),
-                                low: Math.min(low, bidPrice),
-                                close: bidPrice
-                            });
-                        }
-                        
-                        // Set the data to the chart
-                        candlestickSeries.setData(marketData);
-                    }
+        .pokemon-tradingview-section #login-screen {
+            text-align: center;
+            padding: 20px;
+        }
 
-                    function simulateMarketActivity() {
-                        marketParticipants.forEach(participant => {
-                            const decision = Math.random();
-                            const lotSize = Math.floor(Math.random() * 5) + 1;
-                            
-                            if (decision < participant.buyChance && participant.cash >= (bidPrice + spread) * lotSize) {
-                                participant.cash -= (bidPrice + spread) * lotSize;
-                                participant.shares += lotSize;
-                                bidPrice += participant.impact * (lotSize / 10);
-                            } else if (decision > (1 - participant.sellChance) && participant.shares >= lotSize) {
-                                participant.cash += bidPrice * lotSize;
-                                participant.shares -= lotSize;
-                                bidPrice -= participant.impact * (lotSize / 10);
-                            }
+        .pokemon-tradingview-section #login-screen button {
+            background-color: #e3350d;
+            border: 2px solid #ffcb05;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #fff;
+            border-radius: 20px;
+            transition: transform 0.2s;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .pokemon-tradingview-section #login-screen button:hover {
+            transform: scale(1.1);
+        }
+
+        .pokemon-tradingview-section .chart-area {
+            padding: 20px;
+            background-color: #f7e7ce;
+            border: 2px dashed #3c5aa6;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .pokemon-tradingview-section #trading-chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .pokemon-tradingview-section .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+
+        .pokemon-tradingview-section .trade-panel button {
+            background-color: #2ecc71;
+            border: 2px solid #ffcb05;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #fff;
+            border-radius: 15px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .pokemon-tradingview-section #sell-btn {
+            background-color: #e74c3c;
+        }
+
+        .pokemon-tradingview-section .trade-panel button:hover {
+            background-color: #ffcb05;
+            color: #333;
+        }
+
+        .pokemon-tradingview-section .info-panel {
+            background-color: #f7e7ce;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+        }
+
+        /* Stock Market Application Section Styles */
+        .stock-market-section {
+            padding: 20px;
+            background-color: #1a1a1a;
+            border: none;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            text-align: left;
+        }
+
+        .stock-market-section .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #2a2a2a;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .stock-market-section header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            border-bottom: none;
+        }
+
+        .stock-market-section h1 {
+            font-size: 20px;
+            text-transform: uppercase;
+            color: #00ff00;
+            text-shadow: 1px 1px #000;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .stock-market-section p {
+            font-size: 14px;
+            color: #ccc;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            max-width: 100%;
+        }
+
+        .stock-market-section #stock-login-screen {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stock-market-section #stock-login-screen button {
+            background-color: #00ff00;
+            border: 2px solid #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #000;
+            border-radius: 20px;
+            transition: transform 0.2s;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .stock-market-section #stock-login-screen button:hover {
+            transform: scale(1.1);
+            background-color: #ff00ff;
+            color: #fff;
+        }
+
+        .stock-market-section .chart-area {
+            padding: 20px;
+            background-color: #333;
+            border: 2px dashed #00ff00;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .stock-market-section #stock-chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .stock-market-section .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+
+        .stock-market-section .trade-panel button {
+            background-color: #00ff00;
+            border: 2px solid #fff;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #000;
+            border-radius: 15px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .stock-market-section #stock-sell-btn {
+            background-color: #ff0000;
+            color: #fff;
+        }
+
+        .stock-market-section .trade-panel button:hover {
+            background-color: #ff00ff;
+            color: #fff;
+        }
+
+        .stock-market-section .info-panel {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* Ensure footer doesn’t overlap content */
+        body {
+            padding-bottom: 60px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-bottom: 40px;
+            }
+            .pokemon-tradingview-section .container,
+            .stock-market-section .container {
+                margin: 10px auto;
+            }
+            .pokemon-tradingview-section #trading-chart,
+            .stock-market-section #stock-chart {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Existing $MCR Content -->
+    <header>
+        <h1>Memecoin Reserve</h1>
+        <p>LETS MAKE THE MEMEWORLD GREAT AGAIN</p>
+    </header>
+    <section class="hero">
+        <img src="cooltext477636400438816.png" alt="Pixel $MCR Logo" class="pixel-art">
+        <h3>MEMECOINS RESERVE CURRENCY</h3>
+        <p>The Memecoin Reserve ($MCR) is a revolutionary meme token that combines the power of memes with the stability of a reserve currency.</p>
+        <a href="https://pump.fun/coin/CQiAuR7FEHu3m4uqDC11PUtz5fvCATPC29FJr7hvpump?include-nsfw=true" target="_blank" class="btn">BUY $MCR</a>
+    </section>
+    <section class="about">
+        <h3>About $MCR</h3>
+        <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $40,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $40,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
+    </section>
+    <section class="AILYF3-efficiency-clock">
+        <h3>AILYF3 Efficiency Clock</h3>
+        <div id="efficiencyTimer">Next Efficiency Payout: Calculating...</div>
+        <p>Counting down to the next $MCR dividend—cutting waste, meme-style!</p>
+    </section>
+    <section class="progress-section">
+        <div class="bar-container">
+            <div class="bar-fill" id="progressBar">0%</div>
+        </div>
+        <div id="statusMessage"></div>
+    </section>
+
+    <!-- Existing Pokémon TradingView Section -->
+    <section class="pokemon-tradingview-section">
+        <div class="container" id="login-screen">
+            <h1>Pokémon TradingView</h1>
+            <p>Join the Pokémon Trading Guild to start!</p>
+            <button id="discord-login">Login with Discord</button>
+        </div>
+        <div class="container" id="trading-screen" style="display: none;">
+            <header>
+                <h1>Pokémon TradingView - NEB/USD</h1>
+            </header>
+            <main>
+                <div class="chart-area">
+                    <div id="trading-chart"></div>
+                </div>
+                <div class="controls">
+                    <div class="trade-panel">
+                        <button id="buy-btn">Buy</button>
+                        <button id="sell-btn">Sell</button>
+                    </div>
+                    <div class="info-panel">
+                        <p>Bid: <span id="bid-price">1.0000</span> | Ask: <span id="ask-price">1.0002</span></p>
+                        <p>Creds: <span id="cash">10000</span> | NeonBits: <span id="neonbits">0</span> | Wealth: <span id="wealth">10000</span></p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Stock Market Application Section -->
+    <section class="stock-market-section">
+        <div class="container" id="stock-login-screen">
+            <h1>Stock Market - MCRX/USD</h1>
+            <p>Login to start trading MCRX shares!</p>
+            <button id="stock-login-btn">Login</button>
+        </div>
+        <div class="container" id="stock-trading-screen" style="display: none;">
+            <header>
+                <h1>Stock Market - MCRX/USD</h1>
+            </header>
+            <main>
+                <div class="chart-area">
+                    <div id="stock-chart"></div>
+                </div>
+                <div class="controls">
+                    <div class="trade-panel">
+                        <button id="stock-buy-btn">Buy</button>
+                        <button id="stock-sell-btn">Sell</button>
+                    </div>
+                    <div class="info-panel">
+                        <p>Bid: <span id="stock-bid-price">100.00</span> | Ask: <span id="stock-ask-price">100.20</span></p>
+                        <p>Cash: <span id="stock-cash">10000</span> | Shares: <span id="stock-shares">0</span> | Portfolio: <span id="stock-portfolio">10000</span></p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <footer>
+        <p>Stay connected with our community: <a href="https://discord.gg/KVJxgjF2mR">AILYF3</a></p>
+    </footer>
+
+    <script>
+        // Existing $MCR JavaScript
+        const creatorWallet = "5MmV7mbFfkFy9N5MC6wBgJP1nrf7A89Fr5H1hqqNT52q";
+        let memecoins = [{ name: "$MCR", marketCap: 1000000, totalSavings: 0 }];
+        let approvedCount = 0;
+        let isEligible = true;
+
+        async function fetchMyMemecoins() {
+            try {
+                updateProgress();
+            } catch (error) {
+                console.error("Error fetching memecoins:", error);
+                document.getElementById('statusMessage').textContent = "Failed to load memecoin data.";
+            }
+        }
+
+        function getTotalTargetDividend() {
+            const totalMarketCap = memecoins.reduce((total, coin) => total + coin.marketCap, 0);
+            return totalMarketCap * 0.25;
+        }
+
+        function updateProgress() {
+            if (!isEligible) {
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('statusMessage').textContent = 'You are not eligible for dividends.';
+                return;
+            }
+
+            const totalSavings = memecoins.reduce((total, coin) => total + coin.totalSavings, 0);
+            const totalTargetDividend = getTotalTargetDividend();
+            const creatorCut = 40000;
+
+            if (totalTargetDividend < creatorCut) {
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('statusMessage').textContent = `Insufficient profits for dividends (needs $${(creatorCut / 0.25).toLocaleString()} total market cap). Current Savings: $${totalSavings.toLocaleString()} across ${memecoins.length} memecoin(s).`;
+                return;
+            }
+
+            const currentValue = approvedCount > 0 ? totalSavings / approvedCount : 0;
+            const percentage = Math.min((currentValue / totalTargetDividend) * 100, 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${Math.round(percentage)}%`;
+
+            if (percentage >= 100) {
+                document.getElementById('statusMessage').textContent = 'Dividend goal reached! Payout processing...';
+            } else {
+                const remainingPool = totalTargetDividend - creatorCut;
+                const holderShare = remainingPool * 0.5;
+                const victimShare = remainingPool * 0.5;
+                document.getElementById('statusMessage').textContent = 
+                    `Progress: ${Math.round(percentage)}% of $${totalTargetDividend.toLocaleString()} dividend goal. ` +
+                    `Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved claim(s) across ${memecoins.length} memecoin(s). ` +
+                    `Creator's Cut: $${creatorCut.toLocaleString()}. ` +
+                    `Holders: $${holderShare.toLocaleString()} (12.5%). ` +
+                    `Victims: $${victimShare.toLocaleString()} (12.5%).`;
+            }
+        }
+
+        function setApprovedCount(newCount) {
+            approvedCount = Math.max(0, newCount);
+            updateProgress();
+        }
+
+        function updateMemecoin(name, newMarketCap, newSavings) {
+            const coin = memecoins.find(c => c.name === name);
+            if (coin) {
+                coin.marketCap = Math.max(0, newMarketCap);
+                coin.totalSavings = Math.max(0, newSavings);
+                updateProgress();
+            }
+        }
+
+        function startEfficiencyClock() {
+            const payoutDates = [
+                new Date("2025-04-01T00:00:00Z"),
+                new Date("2025-07-01T00:00:00Z"),
+                new Date("2025-10-01T00:00:00Z"),
+                new Date("2026-01-01T00:00:00Z")
+            ];
+
+            function getNextPayoutDate() {
+                const now = new Date();
+                let nextPayout = payoutDates.find(date => date > now);
+                if (!nextPayout) nextPayout = new Date(now.getFullYear() + 1, 0, 1);
+                return nextPayout;
+            }
+
+            function updateCountdown() {
+                const now = new Date();
+                const nextPayout = getNextPayoutDate();
+                const timeDiff = nextPayout - now;
+
+                if (timeDiff <= 0) {
+                    document.getElementById('efficiencyTimer').textContent = "Efficiency Payout Time! Processing...";
+                    setTimeout(updateCountdown, 1000);
+                    return;
+                }
+
+                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+                document.getElementById('efficiencyTimer').textContent = `Next Efficiency Payout: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        function speakMCRPromo() {
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = "Breaking news, Bikini Bottom! The Memecoin Reserve, $MCR, pays 25 percent dividends! Creator grabs 70,000 dollars, split with holders and victims. Market caps shift live—profits dip, dividends stop! Watch the 2-hour event timer! Buy $MCR now on Pump.fun—leeeedle leeedle lee!";
+            speech.volume = 1;
+            speech.rate = 1.2;
+            speech.pitch = 1.2;
+            speech.lang = 'en-US';
+            setTimeout(() => window.speechSynthesis.cancel(), 15000);
+            window.speechSynthesis.speak(speech);
+        }
+
+        // Pokémon TradingView JavaScript
+        function startPokemonTradingView() {
+            if (!window.LightweightCharts) {
+                console.error("LightweightCharts library failed to load. Please check the CDN link and your internet connection.");
+                return;
+            }
+
+            let isAuthenticated = false;
+            const loginScreen = document.getElementById('login-screen');
+            const tradingScreen = document.getElementById('trading-screen');
+            const discordLoginBtn = document.getElementById('discord-login');
+
+            discordLoginBtn.addEventListener('click', () => {
+                isAuthenticated = true;
+                loginScreen.style.display = 'none';
+                tradingScreen.style.display = 'block';
+                initializeChart();
+            });
+
+            function initializeChart() {
+                const chartContainer = document.getElementById('trading-chart');
+                const chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 400,
+                    layout: { background: { color: '#ffffff' }, textColor: '#333' },
+                    grid: { vertLines: { color: '#00ffcc' }, horzLines: { color: '#00ffcc' } },
+                    timeScale: { timeVisible: true, secondsVisible: false },
+                });
+
+                if (typeof chart.addCandlestickSeries !== 'function') {
+                    console.error("addCandlestickSeries is not a function. Lightweight Charts version might be incompatible.");
+                    return;
+                }
+
+                const candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#2ecc71',
+                    downColor: '#e74c3c',
+                    wickUpColor: '#e3350d',
+                    wickDownColor: '#e3350d',
+                });
+                console.log("Chart and candlestick series initialized");
+
+                let bidPrice = 1.0000;
+                let spread = 0.0002;
+                let marketData = [];
+                let cash = 10000;
+                let neonbits = 0;
+                let time = Math.floor(Date.now() / 1000);
+
+                const npcs = [
+                    { name: "Pikachu Trader", cash: 5000, neonbits: 5, buyChance: 0.4, sellChance: 0.3, impact: 0.0003 },
+                    { name: "Charizard Broker", cash: 8000, neonbits: 3, buyChance: 0.2, sellChance: 0.2, impact: 0.0001 },
+                    { name: "Bulbasaur Speculator", cash: 3000, neonbits: 0, buyChance: 0.3, sellChance: 0.3, impact: 0.0002 },
+                ];
+
+                const bidPriceDisplay = document.getElementById('bid-price');
+                const askPriceDisplay = document.getElementById('ask-price');
+                const cashDisplay = document.getElementById('cash');
+                const neonbitsDisplay = document.getElementById('neonbits');
+                const wealthDisplay = document.getElementById('wealth');
+
+                function generateInitialMarketData() {
+                    console.log("Generating initial market data...");
+                    for (let i = 0; i < 30; i++) {
+                        generateFakeNPCData();
+                        marketData.push({
+                            time: time - (30 - i) * 60,
+                            open: i === 0 ? 1.0000 : marketData[i - 1].close,
+                            high: bidPrice + Math.random() * 0.0005,
+                            low: bidPrice - Math.random() * 0.0005,
+                            close: bidPrice,
                         });
-                        
-                        // Ensure price stays within reasonable bounds
-                        bidPrice = Math.max(50, Math.min(150, bidPrice));
-                        spread = 0.10 + Math.random() * 0.30;
                     }
+                    candlestickSeries.setData(marketData);
+                    console.log("Initial data:", marketData);
+                }
 
-                    function updateMarketData() {
-                        simulateMarketActivity();
-                        
-                        const currentTime = Math.floor(Date.now() / 1000);
-                        const lastCandle = marketData[marketData.length - 1];
-                        
-                        // Create a new candle every hour
-                        if (currentTime - lastCandle.time >= 3600) {
-                            const newCandle = {
-                                time: currentTime,
-                                open: lastCandle.close,
-                                high: bidPrice + Math.random(),
-                                low: bidPrice - Math.random(),
-                                close: bidPrice
-                            };
-                            
-                            marketData.push(newCandle);
-                            candlestickSeries.update(newCandle);
-                            
-                            // Keep only the last 100 candles for performance
-                            if (marketData.length > 100) {
-                                marketData.shift();
-                                candlestickSeries.setData(marketData);
-                            }
-                        } else {
-                            // Update the current candle
-                            const updatedCandle = {
-                                ...lastCandle,
-                                close: bidPrice,
-                                high: Math.max(lastCandle.high, bidPrice),
-                                low: Math.min(lastCandle.low, bidPrice)
-                            };
-                            
-                            marketData[marketData.length - 1] = updatedCandle;
-                            candlestickSeries.update(updatedCandle);
-                        }
-                    }
+                function generateFakeNPCData() {
+                    npcs.forEach(npc => {
+                        const decision = Math.random();
+                        const lotSize = Math.floor(Math.random() * 2) + 1;
 
-                    function updateUI() {
-                        bidPriceDisplay.textContent = bidPrice.toFixed(2);
-                        askPriceDisplay.textContent = (bidPrice + spread).toFixed(2);
-                        cashDisplay.textContent = Math.floor(cash);
-                        sharesDisplay.textContent = shares;
-                        portfolioDisplay.textContent = Math.floor(cash + shares * bidPrice);
-                    }
-
-                    // Buy button event listener
-                    document.getElementById('stock-buy-btn').addEventListener('click', () => {
-                        const askPrice = bidPrice + spread;
-                        const lotSize = 1;
-                        const cost = askPrice * lotSize;
-                        
-                        if (cash >= cost) {
-                            cash -= cost;
-                            shares += lotSize;
-                            bidPrice += 0.05; // Small market impact
-                            updateMarketData();
-                            updateUI();
-                        } else {
-                            alert("Insufficient funds to buy shares!");
+                        if (decision < npc.buyChance && npc.cash >= (bidPrice + spread) * lotSize * 10000) {
+                            npc.cash -= (bidPrice + spread) * lotSize * 10000;
+                            npc.neonbits += lotSize;
+                            bidPrice += npc.impact * lotSize;
+                            console.log(`${npc.name} buys ${lotSize} NeonBits at ${(bidPrice + spread).toFixed(4)}`);
+                        } else if (decision > (1 - npc.sellChance) && npc.neonbits >= lotSize) {
+                            npc.cash += bidPrice * lotSize * 10000;
+                            npc.neonbits -= lotSize;
+                            bidPrice -= npc.impact * lotSize;
+                            console.log(`${npc.name} sells ${lotSize} NeonBits at ${bidPrice.toFixed(4)}`);
                         }
                     });
+                    bidPrice = Math.max(0.9000, Math.min(1.1000, bidPrice));
+                    spread = 0.0002 + Math.random() * 0.0003;
+                }
 
-                    // Sell button event listener
-                    document.getElementById('stock-sell-btn').addEventListener('click', () => {
-                        if (shares > 0) {
-                            const lotSize = 1;
-                            const revenue = bidPrice * lotSize;
-                            
-                            cash += revenue;
-                            shares -= lotSize;
-                            bidPrice -= 0.05; // Small market impact
-                            updateMarketData();
-                            updateUI();
-                        } else {
-                            alert("No shares to sell!");
-                        }
-                    });
+                function updateMarketData() {
+                    generateFakeNPCData();
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    const lastCandle = marketData[marketData.length - 1] || { time: 0, close: 1.0000 };
+                    if (currentTime - lastCandle.time >= 60 || !marketData.length) {
+                        const newCandle = {
+                            time: currentTime,
+                            open: lastCandle.close,
+                            high: bidPrice + Math.random() * 0.0005,
+                            low: bidPrice - Math.random() * 0.0005,
+                            close: bidPrice,
+                        };
+                        marketData.push(newCandle);
+                        candlestickSeries.update(newCandle);
+                        console.log("New candle added:", newCandle);
+                    } else {
+                        lastCandle.close = bidPrice;
+                        candlestickSeries.update(lastCandle);
+                        console.log("Updated last candle:", lastCandle);
+                    }
+                }
 
-                    // Market update loop
-                    function updateMarket() {
+                function updateUI() {
+                    bidPriceDisplay.textContent = bidPrice.toFixed(4);
+                    askPriceDisplay.textContent = (bidPrice + spread).toFixed(4);
+                    cashDisplay.textContent = Math.floor(cash);
+                    neonbitsDisplay.textContent = neonbits;
+                    wealthDisplay.textContent = Math.floor(cash + neonbits * bidPrice);
+                }
+
+                document.getElementById('buy-btn').addEventListener('click', () => {
+                    const askPrice = bidPrice + spread;
+                    const lotSize = 1;
+                    const cost = askPrice * lotSize * 10000;
+                    if (cash >= cost) {
+                        cash -= cost;
+                        neonbits += lotSize;
+                        bidPrice += 0.0002;
                         updateMarketData();
                         updateUI();
-                        setTimeout(updateMarket, 1000); // Update every second
+                        console.log(`Player buys 1 NeonBit at ${askPrice.toFixed(4)}`);
+                    } else {
+                        alert("Insufficient funds to buy!");
+                    }
+                });
+
+                document.getElementById('sell-btn').addEventListener('click', () => {
+                    if (neonbits > 0) {
+                        const lotSize = 1;
+                        const revenue = bidPrice * lotSize * 10000;
+                        cash += revenue;
+                        neonbits -= lotSize;
+                        bidPrice -= 0.0002;
+                        updateMarketData();
+                        updateUI();
+                        console.log(`Player sells 1 NeonBit at ${bidPrice.toFixed(4)}`);
+                    } else {
+                        alert("No NeonBits to sell!");
+                    }
+                });
+
+                function updateMarket() {
+                    updateMarketData();
+                    updateUI();
+                    requestAnimationFrame(updateMarket);
+                }
+
+                window.addEventListener('resize', () => {
+                    chart.applyOptions({ width: chartContainer.clientWidth });
+                    chart.timeScale().fitContent();
+                });
+
+                chart.applyOptions({
+                    layout: {
+                        attributionText: 'Powered by TradingView Lightweight Charts',
+                        attributionLink: 'https://www.tradingview.com/lightweight-charts/',
+                    },
+                });
+
+                generateInitialMarketData();
+                if (marketData.length > 0) {
+                    updateUI();
+                } else {
+                    console.error("Initial market data failed to generate!");
+                }
+                updateMarket();
+            }
+        }
+
+        // Stock Market Application JavaScript
+        function startStockMarketApp() {
+            if (!window.LightweightCharts) {
+                console.error("LightweightCharts library failed to load. Please check the CDN link and your internet connection.");
+                return;
+            }
+
+            let isAuthenticated = false;
+            const loginScreen = document.getElementById('stock-login-screen');
+            const tradingScreen = document.getElementById('stock-trading-screen');
+            const loginBtn = document.getElementById('stock-login-btn');
+
+            loginBtn.addEventListener('click', () => {
+                isAuthenticated = true;
+                loginScreen.style.display = 'none';
+                tradingScreen.style.display = 'block';
+                initializeStockChart();
+            });
+
+            function initializeStockChart() {
+                const chartContainer = document.getElementById('stock-chart');
+                const chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 400,
+                    layout: { background: { color: '#222' }, textColor: '#ccc' },
+                    grid: { vertLines: { color: '#444' }, horzLines: { color: '#444' } },
+                    timeScale: { timeVisible: true, secondsVisible: false },
+                });
+
+                if (typeof chart.addCandlestickSeries !== 'function') {
+                    console.error("addCandlestickSeries is not a function. Lightweight Charts version might be incompatible.");
+                    return;
+                }
+
+                const candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#00ff00',
+                    downColor: '#ff0000',
+                    wickUpColor: '#00ff00',
+                    wickDownColor: '#ff0000',
+                });
+                console.log("Stock chart and candlestick series initialized");
+
+                let bidPrice = 100.00;
+                let spread = 0.20;
+                let marketData = [];
+                let cash = 10000;
+                let shares = 0;
+                let time = Math.floor(Date.now() / 1000);
+
+                const traders = [
+                    { name: "Institutional Investor", cash: 50000, shares: 500, buyChance: 0.35, sellChance: 0.25, impact: 0.05 },
+                    { name: "Day Trader", cash: 25000, shares: 100, buyChance: 0.45, sellChance: 0.45, impact: 0.02 },
+                    { name: "Hedge Fund", cash: 100000, shares: 1000, buyChance: 0.2, sellChance: 0.3, impact: 0.1 },
+                ];
+
+                const bidPriceDisplay = document.getElementById('stock-bid-price');
+                const askPriceDisplay = document.getElementById('stock-ask-price');
+                const cashDisplay = document.getElementById('stock-cash');
+                const sharesDisplay = document.getElementById('stock-shares');
+                const portfolioDisplay = document.getElementById('stock-portfolio');
+
+                function generateInitialMarketData() {
+                    console.log("Generating initial stock market data...");
+                    for (let i = 0; i < 30; i++) {
+                        simulateMarketActivity();
+                        marketData.push({
+                            time: time - (30 - i) * 3600, // 1-hour candles
+                            open: i === 0 ? 100.00 : marketData[i - 1].close,
+                            high: bidPrice + Math.random() * 0.50,
+                            low: bidPrice - Math.random() * 0.50,
+                            close: bidPrice,
+                        });
+                    }
+                    candlestickSeries.setData(marketData);
+                    console.log("Initial stock data:", marketData);
+                }
+
+                function simulateMarketActivity() {
+                    let volatility = 0.20; // Base volatility
+                    for (let i = 0; i < 50; i++) { // Simulate 50 market movements per candle
+                        if (Math.random() < 0.5) {
+                            bidPrice += Math.random() * volatility;
+                        } else {
+                            bidPrice -= Math.random() * volatility;
+                        }
                     }
 
-                    // Handle window resize
-                    window.addEventListener('resize', () => {
-                        chart.applyOptions({ width: chartContainer.clientWidth });
-                        chart.timeScale().fitContent();
+                    traders.forEach(participant => {
+                        const decision = Math.random();
+                        const lotSize = Math.floor(Math.random() * 10) + 1;
+
+                        if (decision < participant.buyChance && participant.cash >= (bidPrice + spread) * lotSize) {
+                            participant.cash -= (bidPrice + spread) * lotSize;
+                            participant.shares += lotSize;
+                            bidPrice += participant.impact * lotSize;
+                            console.log(`${participant.name} buys ${lotSize} shares at ${(bidPrice + spread).toFixed(2)}`);
+                        } else if (decision > (1 - participant.sellChance) && participant.shares >= lotSize) {
+                            participant.cash += bidPrice * lotSize;
+                            participant.shares -= lotSize;
+                            bidPrice -= participant.impact * lotSize;
+                            console.log(`${participant.name} sells ${lotSize} shares at ${bidPrice.toFixed(2)}`);
+                        }
                     });
 
-                    // Initialize and start the market simulation
-                    generateInitialMarketData();
+                    bidPrice = Math.max(50, Math.min(150, bidPrice)); // Keep price within bounds
+                    spread = 0.10 + Math.random() * 0.30;
+                }
+
+                function updateMarketData() {
+                    simulateMarketActivity();
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    const lastCandle = marketData[marketData.length - 1] || { time: 0, close: 100.00 };
+
+                    if (currentTime - lastCandle.time >= 3600 || !marketData.length) { // New 1-hour candle
+                        const newCandle = {
+                            time: currentTime,
+                            open: lastCandle.close,
+                            high: bidPrice + Math.random() * 0.50,
+                            low: bidPrice - Math.random() * 0.50,
+                            close: bidPrice,
+                        };
+                        marketData.push(newCandle);
+                        candlestickSeries.update(newCandle);
+                        console.log("New stock candle added:", newCandle);
+                    } else {
+                        lastCandle.close = bidPrice;
+                        lastCandle.high = Math.max(lastCandle.high, bidPrice);
+                        lastCandle.low = Math.min(lastCandle.low, bidPrice);
+                        candlestickSeries.update(lastCandle);
+                        console.log("Updated last stock candle:", lastCandle);
+                    }
+                }
+
+                function updateUI() {
+                    bidPriceDisplay.textContent = bidPrice.toFixed(2);
+                    askPriceDisplay.textContent = (bidPrice + spread).toFixed(2);
+                    cashDisplay.textContent = Math.floor(cash);
+                    sharesDisplay.textContent = shares;
+                    portfolioDisplay.textContent = Math.floor(cash + shares * bidPrice);
+                }
+
+                document.getElementById('stock-buy-btn').addEventListener('click', () => {
+                    const askPrice = bidPrice + spread;
+                    const lotSize = 1;
+                    const cost = askPrice * lotSize;
+                    if (cash >= cost) {
+                        cash -= cost;
+                        shares += lotSize;
+                        bidPrice += 0.05; // Small market impact
+                        updateMarketData();
+                        updateUI();
+                        console.log(`Player buys 1 share at ${askPrice.toFixed(2)}`);
+                    } else {
+                        alert("Insufficient funds to buy!");
+                    }
+                });
+
+                document.getElementById('stock-sell-btn').addEventListener('click', () => {
+                    if (shares > 0) {
+                        const lotSize = 1;
+                        const revenue = bidPrice * lotSize;
+                        cash += revenue;
+                        shares -= lotSize;
+                        bidPrice -= 0.05; // Small market impact
+                        updateMarketData();
+                        updateUI();
+                        console.log(`Player sells 1 share at ${bidPrice.toFixed(2)}`);
+                    } else {
+                        alert("No shares to sell!");
+                    }
+                });
+
+                function updateMarket() {
+                    updateMarketData();
+                    updateUI();
+                    setTimeout(updateMarket, 1000); // Update every second
+                }
+
+                window.addEventListener('resize', () => {
+                    chart.applyOptions({ width: chartContainer.clientWidth });
+                    chart.timeScale().fitContent();
+                });
+
+                chart.applyOptions({
+                    layout: {
+                        attributionText: 'Powered by TradingView Lightweight Charts',
+                        attributionLink: 'https://www.tradingview.com/lightweight-charts/',
+                    },
+                });
+
+                generateInitialMarketData();
+                if (marketData.length > 0) {
                     updateUI();
                     updateMarket();
+                } else {
+                    console.error("Initial stock market data failed to generate!");
                 }
             }
         }
 
-        // Initialize everything when the page loads
+        // Initialize all sections
         document.addEventListener('DOMContentLoaded', () => {
             fetchMyMemecoins();
             startEfficiencyClock();
             startPokemonTradingView();
             startStockMarketApp();
-            
-            // Update memecoin data for demo purposes
-            setTimeout(() => {
-                updateMemecoin("$MCR", 1500000, 50000);
-                setApprovedCount(10);
-            }, 2000);
         });
     </script>
 </body>
 </html>
-
