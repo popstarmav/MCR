@@ -1,166 +1,231 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memecoin Reserve ($MCR)</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <h1>Memecoin Reserve</h1>
-        <p>LETS MAKE THE MEMEWORLD GREAT AGAIN</p>
-    </header>
-    <section class="hero">
-        <img src="cooltext477636400438816.png" alt="Pixel $MCR Logo" class="pixel-art">
-        <h3>MEMECOINS RESERVE CURRENCY</h3>
-        <p>The Memecoin Reserve ($MCR) is a revolutionary meme token that combines the power of memes with the stability of a reserve currency.</p>
-        <a href="https://pump.fun/coin/CQiAuR7FEHu3m4uqDC11PUtz5fvCATPC29FJr7hvpump?include-nsfw=true" target="_blank" class="btn">BUY $MCR</a>
-    </section>
-    <section class="about">
-        <h3>About $MCR</h3>
-        <p>Welcome to Memecoin Reserve ($MCR), inspired by the Department of Government Efficiency (DOGE) mission to cut waste and boost efficiency. Launched on Pump.fun and powered by Solana, $MCR tackles rug pulls by sharing 25% of profits as Meme Dividends, dynamically adjusted based on market cap. From this, the creator takes a fixed $40,000 as a fair reward, with the remainder split equally—12.5% to holders (proportional to holdings) and 12.5% to scam victims (based on approved claims). If profits are too low to support the $40,000 cut, dividends are paused. The other 75% is retained for sustainability (development, marketing, operations), mirroring DOGE’s goal of streamlining for growth. This quarterly payout system aligns with our efficiency-driven ethos, creating a transparent reward ecosystem across all memecoins we launch.</p>
-    </section>
-    <section class="AILYF3-efficiency-clock">
-        <h3>AILYF3 Efficiency Clock</h3>
-        <div id="efficiencyTimer">Next Efficiency Payout: Calculating...</div>
-        <p>Counting down to the next $MCR dividend—cutting waste, meme-style!</p>
-    </section>
-    <section class="progress-section">
-        <div class="bar-container">
-            <div class="bar-fill" id="progressBar">0%</div>
-        </div>
-        <div id="statusMessage"></div>
-    </section>
-    <footer>
-        <p>Stay connected with our community: <a href="https://discord.gg/KVJxgjF2mR">AILYF3</a></p>
-    </footer>
-    <script>
-        const creatorWallet = "5MmV7mbFfkFy9N5MC6wBgJP1nrf7A89Fr5H1hqqNT52q";
-        let memecoins = [{ name: "$MCR", marketCap: 1000000, totalSavings: 0 }];
-        let approvedCount = 0;
-        let isEligible = true;
+                function initializeStockChart() {
+                    const chartContainer = document.getElementById('stock-chart');
+                    const chart = LightweightCharts.createChart(chartContainer, {
+                        width: chartContainer.clientWidth,
+                        height: 400,
+                        layout: { 
+                            background: { color: '#1a1a1a' }, 
+                            textColor: '#00ff00' 
+                        },
+                        grid: { 
+                            vertLines: { color: '#333333' }, 
+                            horzLines: { color: '#333333' } 
+                        },
+                        timeScale: { 
+                            timeVisible: true, 
+                            secondsVisible: false,
+                            borderColor: '#00ff00'
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                            vertLine: {
+                                color: '#00ff00',
+                                width: 1,
+                                style: LightweightCharts.LineStyle.Dashed,
+                            },
+                            horzLine: {
+                                color: '#00ff00',
+                                width: 1,
+                                style: LightweightCharts.LineStyle.Dashed,
+                            },
+                        },
+                    });
 
-        async function fetchMyMemecoins() {
-            try {
-                updateProgress();
-            } catch (error) {
-                console.error("Error fetching memecoins:", error);
-                document.getElementById('statusMessage').textContent = "Failed to load memecoin data.";
-            }
-        }
+                    const candlestickSeries = chart.addCandlestickSeries({
+                        upColor: '#00ff00',
+                        downColor: '#ff0000',
+                        wickUpColor: '#00ff00',
+                        wickDownColor: '#ff0000',
+                        borderVisible: false,
+                    });
 
-        function getTotalTargetDividend() {
-            const totalMarketCap = memecoins.reduce((total, coin) => total + coin.marketCap, 0);
-            return totalMarketCap * 0.25;
-        }
+                    let bidPrice = 100.00;
+                    let spread = 0.20;
+                    let marketData = [];
+                    let cash = 10000;
+                    let shares = 0;
+                    let time = Math.floor(Date.now() / 1000);
 
-        function updateProgress() {
-            if (!isEligible) {
-                document.getElementById('progressBar').style.width = '0%';
-                document.getElementById('statusMessage').textContent = 'You are not eligible for dividends.';
-                return;
-            }
+                    // Market participants
+                    const marketParticipants = [
+                        { name: "Institutional Investor", cash: 500000, shares: 500, buyChance: 0.35, sellChance: 0.25, impact: 0.05 },
+                        { name: "Day Trader", cash: 25000, shares: 100, buyChance: 0.45, sellChance: 0.45, impact: 0.02 },
+                        { name: "Retail Investor", cash: 10000, shares: 20, buyChance: 0.3, sellChance: 0.2, impact: 0.01 },
+                        { name: "Hedge Fund", cash: 1000000, shares: 1000, buyChance: 0.2, sellChance: 0.3, impact: 0.1 }
+                    ];
 
-            const totalSavings = memecoins.reduce((total, coin) => total + coin.totalSavings, 0);
-            const totalTargetDividend = getTotalTargetDividend();
-            const creatorCut = 40000;
+                    const bidPriceDisplay = document.getElementById('stock-bid-price');
+                    const askPriceDisplay = document.getElementById('stock-ask-price');
+                    const cashDisplay = document.getElementById('stock-cash');
+                    const sharesDisplay = document.getElementById('stock-shares');
+                    const portfolioDisplay = document.getElementById('stock-portfolio');
 
-            if (totalTargetDividend < creatorCut) {
-                document.getElementById('progressBar').style.width = '0%';
-                document.getElementById('statusMessage').textContent = `Insufficient profits for dividends (needs $${(creatorCut / 0.25).toLocaleString()} total market cap). Current Savings: $${totalSavings.toLocaleString()} across ${memecoins.length} memecoin(s).`;
-                return;
-            }
+                    function generateInitialMarketData() {
+                        const basePrice = 100.00;
+                        const volatility = 2.0;
+                        
+                        // Generate data for the past 30 periods
+                        for (let i = 0; i < 30; i++) {
+                            // Simulate some market movement
+                            if (i > 0) {
+                                const prevClose = marketData[i-1].close;
+                                const change = (Math.random() - 0.5) * volatility;
+                                bidPrice = Math.max(50, Math.min(150, prevClose + change));
+                            } else {
+                                bidPrice = basePrice;
+                            }
+                            
+                            const high = bidPrice + Math.random() * volatility;
+                            const low = bidPrice - Math.random() * volatility;
+                            
+                            marketData.push({
+                                time: time - (30 - i) * 3600, // Hourly candles
+                                open: i === 0 ? basePrice : marketData[i-1].close,
+                                high: Math.max(high, bidPrice),
+                                low: Math.min(low, bidPrice),
+                                close: bidPrice
+                            });
+                        }
+                        
+                        // Set the data to the chart
+                        candlestickSeries.setData(marketData);
+                    }
 
-            const currentValue = approvedCount > 0 ? totalSavings / approvedCount : 0;
-            const percentage = Math.min((currentValue / totalTargetDividend) * 100, 100);
-            const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = `${percentage}%`;
-            progressBar.textContent = `${Math.round(percentage)}%`;
+                    function simulateMarketActivity() {
+                        marketParticipants.forEach(participant => {
+                            const decision = Math.random();
+                            const lotSize = Math.floor(Math.random() * 5) + 1;
+                            
+                            if (decision < participant.buyChance && participant.cash >= (bidPrice + spread) * lotSize) {
+                                participant.cash -= (bidPrice + spread) * lotSize;
+                                participant.shares += lotSize;
+                                bidPrice += participant.impact * (lotSize / 10);
+                            } else if (decision > (1 - participant.sellChance) && participant.shares >= lotSize) {
+                                participant.cash += bidPrice * lotSize;
+                                participant.shares -= lotSize;
+                                bidPrice -= participant.impact * (lotSize / 10);
+                            }
+                        });
+                        
+                        // Ensure price stays within reasonable bounds
+                        bidPrice = Math.max(50, Math.min(150, bidPrice));
+                        spread = 0.10 + Math.random() * 0.30;
+                    }
 
-            if (percentage >= 100) {
-                document.getElementById('statusMessage').textContent = 'Dividend goal reached! Payout processing...';
-            } else {
-                const remainingPool = totalTargetDividend - creatorCut;
-                const holderShare = remainingPool * 0.5; // 12.5% of total profits
-                const victimShare = remainingPool * 0.5; // 12.5% of total profits
-                document.getElementById('statusMessage').textContent = 
-                    `Progress: ${Math.round(percentage)}% of $${totalTargetDividend.toLocaleString()} dividend goal. ` +
-                    `Savings: $${totalSavings.toLocaleString()} for ${approvedCount} approved claim(s) across ${memecoins.length} memecoin(s). ` +
-                    `Creator's Cut: $${creatorCut.toLocaleString()}. ` +
-                    `Holders: $${holderShare.toLocaleString()} (12.5%). ` +
-                    `Victims: $${victimShare.toLocaleString()} (12.5%).`;
-            }
-        }
+                    function updateMarketData() {
+                        simulateMarketActivity();
+                        
+                        const currentTime = Math.floor(Date.now() / 1000);
+                        const lastCandle = marketData[marketData.length - 1];
+                        
+                        // Create a new candle every hour
+                        if (currentTime - lastCandle.time >= 3600) {
+                            const newCandle = {
+                                time: currentTime,
+                                open: lastCandle.close,
+                                high: bidPrice + Math.random(),
+                                low: bidPrice - Math.random(),
+                                close: bidPrice
+                            };
+                            
+                            marketData.push(newCandle);
+                            candlestickSeries.update(newCandle);
+                            
+                            // Keep only the last 100 candles for performance
+                            if (marketData.length > 100) {
+                                marketData.shift();
+                                candlestickSeries.setData(marketData);
+                            }
+                        } else {
+                            // Update the current candle
+                            const updatedCandle = {
+                                ...lastCandle,
+                                close: bidPrice,
+                                high: Math.max(lastCandle.high, bidPrice),
+                                low: Math.min(lastCandle.low, bidPrice)
+                            };
+                            
+                            marketData[marketData.length - 1] = updatedCandle;
+                            candlestickSeries.update(updatedCandle);
+                        }
+                    }
 
-        function setApprovedCount(newCount) {
-            approvedCount = Math.max(0, newCount);
-            updateProgress();
-        }
+                    function updateUI() {
+                        bidPriceDisplay.textContent = bidPrice.toFixed(2);
+                        askPriceDisplay.textContent = (bidPrice + spread).toFixed(2);
+                        cashDisplay.textContent = Math.floor(cash);
+                        sharesDisplay.textContent = shares;
+                        portfolioDisplay.textContent = Math.floor(cash + shares * bidPrice);
+                    }
 
-        function updateMemecoin(name, newMarketCap, newSavings) {
-            const coin = memecoins.find(c => c.name === name);
-            if (coin) {
-                coin.marketCap = Math.max(0, newMarketCap);
-                coin.totalSavings = Math.max(0, newSavings);
-                updateProgress();
-            }
-        }
+                    // Buy button event listener
+                    document.getElementById('stock-buy-btn').addEventListener('click', () => {
+                        const askPrice = bidPrice + spread;
+                        const lotSize = 1;
+                        const cost = askPrice * lotSize;
+                        
+                        if (cash >= cost) {
+                            cash -= cost;
+                            shares += lotSize;
+                            bidPrice += 0.05; // Small market impact
+                            updateMarketData();
+                            updateUI();
+                        } else {
+                            alert("Insufficient funds to buy shares!");
+                        }
+                    });
 
-        function startEfficiencyClock() {
-            const payoutDates = [
-                new Date("2025-04-01T00:00:00Z"),
-                new Date("2025-07-01T00:00:00Z"),
-                new Date("2025-10-01T00:00:00Z"),
-                new Date("2026-01-01T00:00:00Z")
-            ];
+                    // Sell button event listener
+                    document.getElementById('stock-sell-btn').addEventListener('click', () => {
+                        if (shares > 0) {
+                            const lotSize = 1;
+                            const revenue = bidPrice * lotSize;
+                            
+                            cash += revenue;
+                            shares -= lotSize;
+                            bidPrice -= 0.05; // Small market impact
+                            updateMarketData();
+                            updateUI();
+                        } else {
+                            alert("No shares to sell!");
+                        }
+                    });
 
-            function getNextPayoutDate() {
-                const now = new Date();
-                let nextPayout = payoutDates.find(date => date > now);
-                if (!nextPayout) nextPayout = new Date(now.getFullYear() + 1, 0, 1);
-                return nextPayout;
-            }
+                    // Market update loop
+                    function updateMarket() {
+                        updateMarketData();
+                        updateUI();
+                        setTimeout(updateMarket, 1000); // Update every second
+                    }
 
-            function updateCountdown() {
-                const now = new Date();
-                const nextPayout = getNextPayoutDate();
-                const timeDiff = nextPayout - now;
+                    // Handle window resize
+                    window.addEventListener('resize', () => {
+                        chart.applyOptions({ width: chartContainer.clientWidth });
+                        chart.timeScale().fitContent();
+                    });
 
-                if (timeDiff <= 0) {
-                    document.getElementById('efficiencyTimer').textContent = "Efficiency Payout Time! Processing...";
-                    setTimeout(updateCountdown, 1000);
-                    return;
+                    // Initialize and start the market simulation
+                    generateInitialMarketData();
+                    updateUI();
+                    updateMarket();
                 }
-
-                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-                document.getElementById('efficiencyTimer').textContent = `Next Efficiency Payout: ${days}d ${hours}h ${minutes}m ${seconds}s`;
             }
-
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
         }
 
-        function speakMCRPromo() {
-            const speech = new SpeechSynthesisUtterance();
-            speech.text = "Breaking news, Bikini Bottom! The Memecoin Reserve, $MCR, pays 25 percent dividends! Creator grabs 70,000 dollars, split with holders and victims. Market caps shift live—profits dip, dividends stop! Watch the 2-hour event timer! Buy $MCR now on Pump.fun—leeeedle leeedle lee!";
-            speech.volume = 1;
-            speech.rate = 1.2;
-            speech.pitch = 1.2;
-            speech.lang = 'en-US';
-            setTimeout(() => window.speechSynthesis.cancel(), 15000);
-            window.speechSynthesis.speak(speech);
-        }
-
+        // Initialize everything when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             fetchMyMemecoins();
             startEfficiencyClock();
+            startPokemonTradingView();
+            startStockMarketApp();
+            
+            // Update memecoin data for demo purposes
+            setTimeout(() => {
+                updateMemecoin("$MCR", 1500000, 50000);
+                setApprovedCount(10);
+            }, 2000);
         });
     </script>
 </body>
 </html>
+
